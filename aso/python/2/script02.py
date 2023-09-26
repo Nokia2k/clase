@@ -2,6 +2,8 @@
 
 import sys
 import os
+import shutil
+import random
 
 gente = ["Adrian", "Lautaro", "David", "Jesus", "Victor", "Jose"]
 
@@ -11,7 +13,7 @@ if os.path.exists(path):
     ask = input ("Quieres borrar la carpeta investigacion? ")
     if ask == "si":
         try:
-            os.rmdir(path)
+            shutil.rmtree(path)
             print ("Carpeta borrada")
         except:
             print ("algo ha ido mal...")
@@ -27,9 +29,17 @@ else:
     
     os.mkdir(path)
     print ("Carpeta investigacion creada")
-    os.mkdir(str(path)+"/sospechosos")
-    os.mkdir(str(path)+"/investigados")
+    sos_path = os.path.join(path, "sospechosos")
+    inv_path = os.path.join(path, "investigados")
+    os.mkdir(sos_path)
+    os.mkdir(inv_path)
     print ("Carpertas sospechosos y investigados creados")
-    for crear in gente:
-        os.open(str(path)+"/sospechosos/"+crear+".tkn",'x')
     
+    for crear in gente:
+        personas = os.path.join(sos_path, f"{crear}.tkn")
+        numero = random.randint(1,6)
+        with open(personas, "w") as archivo:
+            archivo.write(str(numero))
+        if numero % 2 == 0:
+            personas_lnk = os.path.join(inv_path, f"{crear}.tkn")
+            os.symlink(personas, personas_lnk)
