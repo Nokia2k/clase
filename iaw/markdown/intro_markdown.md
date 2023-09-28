@@ -9,10 +9,26 @@
 | Victor | Martinez | HP-250 G6 Notebook PC |
 | David | Tronchoni | MSI G70 2pe Apache Pro 
 
-Para entrar al repositorio del que se va a hablar pincha [aqui](https://github.com/Nokia2k/trabajo_parejas).
+<u>
+Para entrar al repositorio del que se va a hablar pincha 
+</u> 
+
+[aqui](https://github.com/Nokia2k/trabajo_parejas)
 
 
-Enlace para un markdown con todos los [alumnos](alumnos.md) 
+*Enlace para un markdown con todos los [alumnos](alumnos.md)*
+
+Requisitos:
+- Dos personas trabajado en GitHub
+- Un repositorio donde trabajar
+- Un archivo que modificar para crear conflictos
+
+Lista ordenada de nombres:
+1. Angela
+2. Bill
+3. Carlos
+
+---
 
 ## Paso 1
 ### - Creando el repositorio en GitHub
@@ -69,7 +85,7 @@ A continuacion vamos a ver que pasa en el equipo de david cuand vaya a subir los
 ## Paso 5
 ### - Resolver los conflictos
 
-Una vez acordado cual es la version final con la que se va a quedar el archivo, en este caso **David** va a cambiar el contenido a como yo lo he modificado y observaremos que si que le dejara subir los cambios:
+a horizontal dUna vez acordado cual es la version final con la que se va a quedar el archivo, en este caso **David** va a cambiar el contenido a como yo lo he modificado y observaremos que si que le dejara subir los cambios:
 
 ![alt text](davi21.jpeg)
 
