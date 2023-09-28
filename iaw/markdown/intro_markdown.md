@@ -17,6 +17,7 @@ Enlace para un markdown con todos los [alumnos](alumnos.md)
 ## Paso 1
 ### - Creando el repositorio en GitHub
 Creamos un repositorio en **GitHub** en nuestro caso con el nombre **trabajo_parejas**
+
 ![alt text](nose.png)
 
 ### - Creando el repositorio en la maquina local
