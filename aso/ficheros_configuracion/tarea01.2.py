@@ -20,7 +20,7 @@ for linea in pass_f:
                
         for linea in sha_f:
 
-            numLinea_s = numLinea_s+1
+            numLinea_s = numLinea_p
             arrayLinea = linea.split(':')
             passwd = arrayLinea[1].strip()
             usuario = arrayLinea[0].strip()
