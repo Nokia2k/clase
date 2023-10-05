@@ -142,6 +142,8 @@ ahora si entramos a [localhost/info.php](localhost/info.php) veremos esta pagina
 
 Si podemos ver esta pagina es porque todo ha ido correctamente.
 
+---
+
 ### Paso 6
 Una herramienta util para administrar las bases de datos es **phpmyadmin**, nos la instalaremos:
 
@@ -212,6 +214,8 @@ wget "http://www.adminer.org/latest.php" -O /var/www/html/adminer.php
 Al acceder a [localhost/adminer.php](localhost/adminer.php) y nos logamos correctamente, accedemos como en el phpMyAdmin y vemos que funciona:
 
 ![alt text](img/15.png)
+
+---
 
 ### Paso 8
 Vamos a instalarnos GoAccess, un analizador de logs para Apache:
