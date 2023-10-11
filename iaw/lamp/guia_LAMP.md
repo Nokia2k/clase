@@ -216,7 +216,6 @@ Al acceder a [localhost/adminer.php](localhost/adminer.php) y nos logamos correc
 ![alt text](img/15.png)
 
 ---
-
 ### Paso 8
 Vamos a instalarnos GoAccess, un analizador de logs para Apache:
 
