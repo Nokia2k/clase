@@ -1,0 +1,18 @@
+;
+; BIND data file for local loopback interface
+;
+$ORIGIN 192.168.0.in-addr.arpa.
+$TTL	604800
+@	IN	SOA	admin.victor.com. root.victor.com. (
+			      2		; Serial
+			 604800		; Refresh
+			  86400		; Retry
+			2419200		; Expire
+			 604800 )	; Negative Cache TTL
+;
+	IN	NS	admin.victor.com.
+	IN	NS	esclavo.victor.com.
+2	IN	PTR	admin.victor.com.
+3	IN	PTR	esclavo.victor.com.
+3	IN	PTR	pc2.victor.com.
+4	IN	PTR	pc3.victor.com.	
