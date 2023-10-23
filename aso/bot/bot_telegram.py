@@ -17,8 +17,11 @@ bot.
 
 import logging
 import socket
+import re
 import netifaces
 import platform
+import nmap
+import psutil
 from ping3 import ping 
 
 from telegram import ForceReply, Update
@@ -40,30 +43,101 @@ async def ip_info(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text(lista)
 
 #### Esto pa hacer el ping y tal ####
-response=" "
+
 async def ping_ip(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    global response
-    ip = context.args[0]
-    for a in range(1,5):
-        try:
-        
+    salida=""
+    try:
+        ip = context.args[0]
+        for a in range(1,5):
             
-            resultado_ping = str(ping(ip))
-            if resultado_ping:
-                response = resultado_ping[4:7:1]
-                response += str(ip) +" -> "+ str(response) + "ms\n"      
-            if resultado_ping is False:
-                response = "Dame algo valido"  
-            else:
-                response = "Failed - Ping results: No response"
-                #update.message.reply_text(response)
-        except:
-            print("Faild")
+                resultado_ping = ping(ip)
+                if isinstance(resultado_ping, float):
+
+                    resultado_ping = str(resultado_ping)
+                    response = resultado_ping[4:7]
+                    salida += str(ip) +" -> "+ str(response) + "ms\n"      
+
+                elif isinstance(resultado_ping, bool):
+                    salida += "IP: " + ip + " -> no response\n"
+                    
+                else:
+                    salida +="IP: " + ip + " -> not reachable\n"
+    except:
+        salida = "** ERROR ** \n -> USO: /ping [IP]"
 
             
-    await update.message.reply_text(response)
-    response=""
+    await update.message.reply_text("** PING IP: " + ip+" **"+"\n\n"+salida )
+    salida=""
     
+#### esto para hacer ver los error log que se han pedido ####
+
+async def log(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    salida = ''
+    grep = 'error'
+    cont = 0
+    
+    try:
+        n = int(context.args[0])
+        with open('/var/log/syslog', 'r') as logs:
+            lines = logs.readlines()
+            lines.reverse()
+            for line in lines:
+                if re.search(grep, line):
+                    salida += line + "\n"
+                    cont += 1
+                    if cont >= n:
+                        break
+    except:
+        salida = "** ERROR ** \n -> USO: /log [numero]"
+    
+    await update.message.reply_text("** Log de errores ** \n \n"+salida)
+    salida=''
+
+#### esto para hacer ver los puertos y programas que estan en uso ####
+
+## SOLO FALTA ORDENARLO ##
+ 
+async def port(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    
+    salida=''
+    var = psutil.net_connections(kind='inet')
+
+    for line in var:
+        local = str(line.status)
+        puerto = str(line.laddr.port)
+        pid = line.pid
+        process = psutil.Process(pid)
+        pro_name = str(process.name())
+
+        if local == "ESTABLISHED":
+            salida += " * Puerto: "+ puerto + " --  "+pro_name+"\n"
+    
+    await update.message.reply_text("** Puertos en uso ** \n \n"+salida)
+    salida = ''
+
+#### esto hace un nmap de la red que le diga ####
+## HAY QUE ARREGLARLO PARA QUE SE VEA BONITO ##
+nm = nmap.PortScanner()
+async def nmap(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    
+    salida=''
+    
+    ip_probe = r'^(\d{1,3}\.){3}\d{1,3}(\/\d{1,2})?$'
+    ip = context.args[0]
+    if re.match(ip_probe, ip):
+
+        hola = nm.scan(hosts=ip, arguments='-n -sP -PE -PA21,23,80,3389')
+        if hola:
+            hosts_list = [(x, nm[x]['status']['state']) for x in nm.all_hosts()]
+            for host, status in hosts_list:
+                salida += host +"\n"
+    else:
+        
+        salida = "Me has dado una ip incorrecta"
+    
+    await update.message.reply_text("** IP encendidas en la red ** \n \n"+salida)
+
+
 
 # Enable logging
 logging.basicConfig(
@@ -88,7 +162,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Send a message when the command /help is issued."""
-    await update.message.reply_text(" -- Primer bot de Telegram -- \n** Instrucciones disponibles ** \n -> /start  \n -> /host \n -> /sistema \n -> /ip \n -> /help")
+    await update.message.reply_text(" -- Primer bot de Telegram -- \n** Instrucciones disponibles ** \n -> /start  \n -> /host \n -> /sys \n -> /net \n -> /ping [IP] \n -> /log [numero]\n -> /port \n -> /nmap [IP RED] \n -> /help")
 
 
 async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -115,9 +189,15 @@ def main() -> None:
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(CommandHandler("host", host_info))
-    application.add_handler(CommandHandler("sistema", so_info))
-    application.add_handler(CommandHandler("ip", ip_info))
+    application.add_handler(CommandHandler("sys", so_info))
+    application.add_handler(CommandHandler("net", ip_info))
     application.add_handler(CommandHandler("ping", ping_ip))
+    application.add_handler(CommandHandler("log", log))
+    application.add_handler(CommandHandler("port", port))
+    application.add_handler(CommandHandler("nmap", nmap))
+
+
+
 
     # on non command i.e message - echo the message on Telegram
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo))
