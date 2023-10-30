@@ -1,0 +1,4 @@
+Reglas Mikrotik:
+ * - Masquerade: add action=masquerade chain=srcnat src-address=0.0.0.0/0 dst-address=0.0.0.0/0 out-interface=ether1
+ * - PortForwarding: add action=dst-nat chain=dstnat to-addresses=10.0.1.2 to-ports=80 protocol=tcp in-interface=ether1 dst-port=80
+ 

@@ -1,0 +1,8 @@
+FROM alpine:latest
+RUN apk update && apk add openssh-server net-tools nmap bind-tools bash openrc 
+#RUN rc-update add sshd default
+EXPOSE 22 
+CMD /bin/bash
+CMD ["/usr/sbin/sshd", "-D"]
+
+

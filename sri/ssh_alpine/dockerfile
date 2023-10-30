@@ -1,5 +1,5 @@
 FROM alpine:latest
-RUN apk update && apk add openssh-server net-tools nmap bind-tools bash openrc 
-EXPOSE 22 
-CMD /bin/bash
+RUN apk update && apk add openssh-server net-tools nmap bind-tools && mkdir /home/alpine
+ENV HOME /home/alpine
+CMD ["/bin/bash"]
 

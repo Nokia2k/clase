@@ -10,15 +10,11 @@ $TTL	604800
 			2419200		; Expire
 			 604800 )	; Negative Cache TTL
 ;
-@		IN	NS	admin.victor.com.
-@		IN	NS	esclavo.victor.com.
-admin		IN	A	192.168.0.2
-server		IN	CNAME	admin.victor.com.
-esclavo		IN	A	192.168.0.3	
+@			IN	NS	admin.valencia.victor.com.
+@			IN	A	192.168.0.100
+admin.valencia		IN	A	192.168.0.100
+
 pc2		IN	A	192.168.0.3	
 pc3		IN	A	192.168.0.4
 
-$ORIGIN valencia.victor.com.
 
-@	IN	NS	admin.valencia.victor.com.
-admin	IN	A	192.168.0.100
