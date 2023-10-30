@@ -6,6 +6,8 @@
     <title>Document</title>
 </head>
 <body>
+    <h1>Ejercicio 12 - PHP</h1>
+    <h2>Ejercicio de Numeros y mas cosas</h2>
     <?php
         function iniciar_array($num, $min, $max) {
             echo "Si me has dado de minimo: $min";

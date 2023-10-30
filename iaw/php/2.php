@@ -6,6 +6,8 @@
     <title>Ejercicio 1 php</title>
 </head>
 <body>
+    <h1>Ejercicio 2 - PHP</h1>
+    <h2>Ejercicio de notas aleatorias</h2>
     <?php
         $nota = rand(0,10);
         if ($nota >= 0 and $nota <= 5) {

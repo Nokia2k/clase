@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
 </head>
-<body>    
+<body>
+    <h1>Ejercicio 3 - PHP</h1>
+    <h2>Ejercicio de dias de la semana y su numero</h2>
     <?php
         $dia = rand(1,7);
         switch ($dia) {

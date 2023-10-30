@@ -6,6 +6,8 @@
     <title>Ejercicio 1 php</title>
 </head>
 <body>
+    <h1>Ejercicio 4 - PHP</h1>
+    <h2>Ejercicio de lanzar un dado</h2>
     <?php
         $lanzar = rand(1,6);
         if ($lanzar == 1) {

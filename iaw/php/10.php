@@ -6,6 +6,8 @@
     <title>Document</title>
 </head>
 <body>
+    <h1>Ejercicio 10 - PHP</h1>
+    <h2>Ejercicio de Paises y sus capitales</h2>
     <?php
         $hola=array("Italy"=>"Rome", "Luxembourg"=>"Luxembourg", "Belgium"=> "Brussels", "
         Denmark"=>"Copenhagen", "Finland"=>"Helsinki", "France" => "Paris", "
