@@ -15,7 +15,9 @@ Press Ctrl-C on the command line or send a signal to the process to stop the
 bot.
 """
 
+import os
 import logging
+import subprocess
 import socket
 import re
 import netifaces
@@ -116,29 +118,110 @@ async def port(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     salida = ''
 
 #### esto hace un nmap de la red que le diga ####
-## HAY QUE ARREGLARLO PARA QUE SE VEA BONITO ##
-nm = nmap.PortScanner()
-async def nmap(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+
+async def ipred(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     
     salida=''
-    
+    nm = nmap.PortScanner()
     ip_probe = r'^(\d{1,3}\.){3}\d{1,3}(\/\d{1,2})?$'
     ip = context.args[0]
     if re.match(ip_probe, ip):
-
+        
         hola = nm.scan(hosts=ip, arguments='-n -sP -PE -PA21,23,80,3389')
         if hola:
             hosts_list = [(x, nm[x]['status']['state']) for x in nm.all_hosts()]
             for host, status in hosts_list:
-                salida += host +"\n"
+                salida += "-> " +  host + " <- \n Estado: " + status + "\n \n"
+        
+        if salida == '':
+            salida = "No se ha encontrado ningun equipo en la red: " + ip
+        
     else:
         
         salida = "Me has dado una ip incorrecta"
     
-    await update.message.reply_text("** IP encendidas en la red ** \n \n"+salida)
+    await update.message.reply_text("** Listado IP encendidas en la red ** \n \n"+salida)
 
+#### esto dice el estado del servcio que le digas ####
 
+async def service_status(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    # Nombre del servicio
+    nom_servicio=context.args[0]
+    try:
+        rc = subprocess.getstatusoutput(f' systemctl status {nom_servicio} | head -3 | tr -d " " | tr -d "●" | tr - : | cut -d ":" -f1 | tr "\n" ,')
+        if rc[0] == 0:
+            hola = (rc[1])
+            nombre = subprocess.getoutput(f'echo {hola} | cut -d "," -f1')
+            active = subprocess.getoutput(f'echo {hola} | cut -d "," -f3')
+            salida = "Nombre: " + nombre + "\n" + "Estado: " + active
 
+        else:
+            salida = "No se ha encontrado el servicio"
+    except:
+        
+        salida = "El servicio esta apagado"
+
+    await update.message.reply_text(f"** Estado del servicio: {nom_servicio} ** \n \n"+salida)
+    
+#### esto arranca del servcio que le digas ####
+    
+async def start_service(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if len(context.args) < 1:
+        await update.message.reply_text("Falta el argumento del servicio.")
+        return
+
+    comando = "/home/viktor/github/clase/aso/bot/iniciar"
+    argumentos = context.args[0]
+    ejecutar = subprocess.run([comando,argumentos])
+    salida = ejecutar.returncode        
+
+    if salida == 0: 
+        
+        await update.message.reply_text(f"El servicio {argumentos} se ha iniciado correctamente")
+
+        
+    else:
+
+        await update.message.reply_text(f" * ERROR: Ha habido un fallo a la hora de iniciar: {argumentos}")
+    
+    
+#### esto para del servcio que le digas ####
+    
+async def stop_service(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if len(context.args) < 1:
+        await update.message.reply_text("Falta el argumento del servicio.")
+        return
+
+    comando = "/home/viktor/github/clase/aso/bot/parar"
+    argumentos = context.args[0]
+    ejecutar = subprocess.run([comando,argumentos])
+    salida = ejecutar.returncode        
+
+    if salida == 0: 
+        
+        await update.message.reply_text(f"El servicio {argumentos} se ha parado correctamente")
+        
+    else:
+
+        await update.message.reply_text(f" * ERROR: Ha habido un fallo a la hora de parar: {argumentos}")
+        
+
+#### esto te da un contador de la cantidad de veces que has ejecutado cada comando ####
+
+    
+#async def stop_service(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 # Enable logging
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
@@ -162,7 +245,21 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Send a message when the command /help is issued."""
-    await update.message.reply_text(" -- Primer bot de Telegram -- \n** Instrucciones disponibles ** \n -> /start  \n -> /host \n -> /sys \n -> /net \n -> /ping [IP] \n -> /log [numero]\n -> /port \n -> /nmap [IP RED] \n -> /help")
+    await update.message.reply_text(f" -- Primer bot de Telegram -- \n"
+                                    f"** Instrucciones disponibles ** \n" 
+                                    f"-> /start  \n"
+                                    f"-> /host \n"
+                                    f"-> /sys \n"
+                                    f"-> /net \n"
+                                    f"-> /ping [IP] \n"
+                                    f"-> /log [numero]\n"
+                                    f"-> /port \n"
+                                    f"-> /nmap [IP RED] \n"
+                                    f"-> /help \n"
+                                    f"-> /service_status [servicio] \n"
+                                    f"-> /start_service [servicio] \n"
+                                    f"-> /stop_service [servicio] \n"
+                                    f"-> /contador")
 
 
 async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -194,9 +291,10 @@ def main() -> None:
     application.add_handler(CommandHandler("ping", ping_ip))
     application.add_handler(CommandHandler("log", log))
     application.add_handler(CommandHandler("port", port))
-    application.add_handler(CommandHandler("nmap", nmap))
-
-
+    application.add_handler(CommandHandler("nmap", ipred))
+    application.add_handler(CommandHandler("service_status", service_status))
+    application.add_handler(CommandHandler("start_service", start_service))
+    application.add_handler(CommandHandler("stop_service", stop_service))
 
 
     # on non command i.e message - echo the message on Telegram
