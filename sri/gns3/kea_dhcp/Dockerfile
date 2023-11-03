@@ -1,7 +1,11 @@
-FROM ubuntu:rolling
+FROM ubuntu:20.04
 
-RUN apt update && apt install kea --yes && rm -rf /var/cache/apt/*
+RUN apt update && apt install -y kea-dhcp4-server 
+RUN mkdir /var/run/kea 
+#RUN mkdir /var/lib/kea
+ADD kea-dhcp4.conf /etc/kea/kea-dhcp4.conf
 
-COPY kea-dhcp4.config /etc/kea
+CMD [ "kea-dhcp4", "-c", "/etc/kea/kea-dhcp4.conf" ]
 
-CMD ["systemctl", "restart", "isc-kea-dhcp4-server"]
+EXPOSE 67 67/udp
+
