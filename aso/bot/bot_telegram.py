@@ -15,7 +15,6 @@ Press Ctrl-C on the command line or send a signal to the process to stop the
 bot.
 """
 
-import os
 import logging
 import subprocess
 import socket
@@ -29,9 +28,49 @@ from ping3 import ping
 from telegram import ForceReply, Update
 from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters
 
+###########################################################################################
+#                                                                                         #
+#                                LISTA DE COMANDOS DEL BOT                                #
+#                                                                                         #
+###########################################################################################
 
-#### Pa conocer la ip y tal ####
+#### esto es el comando de bienvenida, no se toca y au ####
 
+async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    await update.message.reply_text(update.message.text)
+
+#### esto es el comando de bienvenida, no se toca y au ####
+
+cont_1=0
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Send a message when the command /start is issued."""
+    user = update.effective_user
+    await update.message.reply_html(
+        rf"Hi {user.mention_html()}!",
+        reply_markup=ForceReply(selective=True),
+    )
+    global cont_1
+    cont_1 += 1
+
+#### esto da el hostname del dispositivo ####
+
+cont_2=0
+async def host_info(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    await update.message.reply_text(socket.gethostname())
+    global cont_2
+    cont_2 += 1
+#### esto da el sistema operativo del dispositivo ####
+
+cont_3=0
+async def so_info(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    await update.message.reply_text(platform.platform())
+    global cont_3
+    cont_3 += 1
+        
+
+#### esto te dice las ip que tiene el ordenador ####
+
+cont_4=0
 lista_ip = netifaces.interfaces()
 async def ip_info(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     lista = ''
@@ -43,9 +82,12 @@ async def ip_info(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         except:
             pass        
     await update.message.reply_text(lista)
+    global cont_4
+    cont_4 += 1
 
-#### Esto pa hacer el ping y tal ####
+#### esto te da el resultado de 4 pings a una ip ####
 
+cont_5=0
 async def ping_ip(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     salida=""
     try:
@@ -70,9 +112,12 @@ async def ping_ip(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             
     await update.message.reply_text("** PING IP: " + ip+" **"+"\n\n"+salida )
     salida=""
+    global cont_5
+    cont_5 += 1
     
 #### esto para hacer ver los error log que se han pedido ####
 
+cont_6=0
 async def log(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     salida = ''
     grep = 'error'
@@ -94,11 +139,12 @@ async def log(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     
     await update.message.reply_text("** Log de errores ** \n \n"+salida)
     salida=''
+    global cont_6
+    cont_6 += 1
 
 #### esto para hacer ver los puertos y programas que estan en uso ####
 
-## SOLO FALTA ORDENARLO ##
- 
+cont_7=0
 async def port(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     
     salida=''
@@ -116,34 +162,43 @@ async def port(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     
     await update.message.reply_text("** Puertos en uso ** \n \n"+salida)
     salida = ''
+    global cont_7
+    cont_7 += 1
 
 #### esto hace un nmap de la red que le diga ####
 
+cont_8=0
 async def ipred(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     
     salida=''
+    total_ip=0
     nm = nmap.PortScanner()
     ip_probe = r'^(\d{1,3}\.){3}\d{1,3}(\/\d{1,2})?$'
     ip = context.args[0]
     if re.match(ip_probe, ip):
-        
-        hola = nm.scan(hosts=ip, arguments='-n -sP -PE -PA21,23,80,3389')
-        if hola:
-            hosts_list = [(x, nm[x]['status']['state']) for x in nm.all_hosts()]
-            for host, status in hosts_list:
-                salida += "-> " +  host + " <- \n Estado: " + status + "\n \n"
-        
-        if salida == '':
-            salida = "No se ha encontrado ningun equipo en la red: " + ip
-        
+        try:
+            
+            hola = nm.scan(hosts=ip, arguments='-n -sP -PE -PA21,23,80,3389', timeout=60)
+            if hola:
+                hosts_list = [(x, nm[x]['status']['state']) for x in nm.all_hosts()]
+                for host, status in hosts_list:
+                    salida += "----\n-> " +  host + " <- \n Estado: " + status + "\n"
+                    total_ip += 1
+                    
+        except:
+            salida = "** NINGUNA IP ENCONTRADA TRAS EL ESCANEO **\n \nIP ESCANEADA: " + ip 
+            
     else:
         
         salida = "Me has dado una ip incorrecta"
     
-    await update.message.reply_text("** Listado IP encendidas en la red ** \n \n"+salida)
+    await update.message.reply_text("** Listado IP encendidas en la red ** \n \n" + salida + "\n IP totales: " + str(total_ip))
+    global cont_8
+    cont_8 += 1
 
 #### esto dice el estado del servcio que le digas ####
 
+cont_9=0
 async def service_status(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     # Nombre del servicio
     nom_servicio=context.args[0]
@@ -162,9 +217,12 @@ async def service_status(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         salida = "El servicio esta apagado"
 
     await update.message.reply_text(f"** Estado del servicio: {nom_servicio} ** \n \n"+salida)
+    global cont_9
+    cont_9 += 1
     
 #### esto arranca del servcio que le digas ####
     
+cont_10=0
 async def start_service(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if len(context.args) < 1:
         await update.message.reply_text("Falta el argumento del servicio.")
@@ -183,10 +241,12 @@ async def start_service(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     else:
 
         await update.message.reply_text(f" * ERROR: Ha habido un fallo a la hora de iniciar: {argumentos}")
-    
+    global cont_10
+    cont_10 += 1
     
 #### esto para del servcio que le digas ####
-    
+
+cont_11=0    
 async def stop_service(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if len(context.args) < 1:
         await update.message.reply_text("Falta el argumento del servicio.")
@@ -204,47 +264,16 @@ async def stop_service(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     else:
 
         await update.message.reply_text(f" * ERROR: Ha habido un fallo a la hora de parar: {argumentos}")
+    
+    global cont_11
+    cont_11 += 1
         
 
-#### esto te da un contador de la cantidad de veces que has ejecutado cada comando ####
 
-    
-#async def stop_service(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+#### esto da una lista de todos los comandos disponibles ####
 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-# Enable logging
-logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
-)
-# set higher logging level for httpx to avoid all GET and POST requests being logged
-logging.getLogger("httpx").setLevel(logging.WARNING)
-
-logger = logging.getLogger(__name__)
-
-
-# Define a few command handlers. These usually take the two arguments update and
-# context.
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Send a message when the command /start is issued."""
-    user = update.effective_user
-    await update.message.reply_html(
-        rf"Hi {user.mention_html()}!",
-        reply_markup=ForceReply(selective=True),
-    )
-
-
+cont_12=0
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Send a message when the command /help is issued."""
     await update.message.reply_text(f" -- Primer bot de Telegram -- \n"
                                     f"** Instrucciones disponibles ** \n" 
                                     f"-> /start  \n"
@@ -260,20 +289,60 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
                                     f"-> /start_service [servicio] \n"
                                     f"-> /stop_service [servicio] \n"
                                     f"-> /contador")
+    global cont_12
+    cont_12 += 1
 
 
-async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Echo the user message."""
-    await update.message.reply_text(update.message.text)
 
-async def host_info(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Dar el hostname del dispositivo"""
-    await update.message.reply_text(socket.gethostname())
+#### esto te da un contador de la cantidad de veces que has ejecutado cada comando ####
+
+async def contador(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    total=0
+    salida=""
+    ejecutados=""
+    nom_ejecutados=[]
+    cmd1=f"/start: {cont_1}" 
+    cmd2=f"/host: {cont_2}"
+    cmd3=f"/sys: {cont_3}"
+    cmd4=f"/net: {cont_4}"
+    cmd5=f"/ping [IP]: {cont_5}" 
+    cmd6=f"/log [numero]: {cont_6}" 
+    cmd7=f"/port: {cont_7}" 
+    cmd8=f"/nmap [IP RED]: {cont_8}" 
+    cmd9=f"/help: {cont_12}"
+    cmd10=f"/service_status [servicio]: {cont_9}" 
+    cmd11=f"/start_service [servicio]: {cont_10}"
+    cmd12=f"/stop_service [servicio]: {cont_11}"
     
-async def so_info(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Dar el SO del dispositivo"""
-    await update.message.reply_text(platform.platform())
+    for comandos in (cmd1, cmd2, cmd3, cmd4, cmd5, cmd6, cmd7, cmd8, cmd9, cmd10, cmd11, cmd12):
+        veces_ejec = int(comandos.split(":")[1])
+        total = veces_ejec + total
+        if veces_ejec > 0:
+            nom_ejecutados.append(comandos)
+                
+    for comandos_ejecutados in (nom_ejecutados):
+        ejecutados = str(comandos_ejecutados.split(":")[1])
+        nombres = str(comandos_ejecutados.split(":")[0])
+        porcentaje_1 = int(ejecutados) * 100 
+        porcentaje = porcentaje_1 / total
+        salida += nombres + ": "+ "%.2f" % porcentaje+"%\n"
+    await update.message.reply_text(f"** Contador de Instrucciones ** \n" + salida)
 
+###########################################################################################
+#                                                                                         #
+#                            FIN LISTA DE COMANDOS DEL BOT                                #
+#                                                                                         #
+########################################################################################### 
+
+
+# Enable logging
+logging.basicConfig(
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
+)
+# set higher logging level for httpx to avoid all GET and POST requests being logged
+logging.getLogger("httpx").setLevel(logging.WARNING)
+
+logger = logging.getLogger(__name__)
 
 
 
@@ -295,6 +364,7 @@ def main() -> None:
     application.add_handler(CommandHandler("service_status", service_status))
     application.add_handler(CommandHandler("start_service", start_service))
     application.add_handler(CommandHandler("stop_service", stop_service))
+    application.add_handler(CommandHandler("contador", contador))
 
 
     # on non command i.e message - echo the message on Telegram
